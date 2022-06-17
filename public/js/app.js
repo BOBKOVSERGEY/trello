@@ -5458,15 +5458,25 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
-      desks: []
+      desks: [],
+      errored: false
     };
   },
   mounted: function mounted() {
+    var _this = this;
+
     axios.get('/api/V1/desks').then(function (response) {
-      console.log(response);
+      _this.desks = response.data.data;
+    })["catch"](function (error) {
+      console.log(error);
+      _this.errored = true;
     });
   }
 });
@@ -28363,21 +28373,19 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm._m(0)
-}
-var staticRenderFns = [
-  function () {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "container" }, [
-      _c("h1", [_vm._v("Достки")]),
-      _vm._v(" "),
-      _c("div", { staticClass: "row" }, [
-        _c("div", { staticClass: "col-lg-4" }, [
+  return _c("div", { staticClass: "container" }, [
+    _c("h1", [_vm._v("Достки")]),
+    _vm._v(" "),
+    _c(
+      "div",
+      { staticClass: "row" },
+      _vm._l(_vm.desks, function (desk) {
+        return _c("div", { staticClass: "col-lg-4" }, [
           _c("div", { staticClass: "card mt-3" }, [
             _c("a", { staticClass: "card-body", attrs: { href: "#" } }, [
-              _c("h5", { staticClass: "card-title" }, [_vm._v("Card title")]),
+              _c("h5", { staticClass: "card-title" }, [
+                _vm._v(_vm._s(desk.name)),
+              ]),
               _vm._v(" "),
               _c("p", { staticClass: "card-text" }, [
                 _vm._v(
@@ -28392,11 +28400,21 @@ var staticRenderFns = [
               ),
             ]),
           ]),
-        ]),
-      ]),
-    ])
-  },
-]
+        ])
+      }),
+      0
+    ),
+    _vm._v(" "),
+    _vm.errored
+      ? _c(
+          "div",
+          { staticClass: "alert alert-danger", attrs: { role: "alert" } },
+          [_vm._v("\n        Ошибка загрузки данных\n    ")]
+        )
+      : _vm._e(),
+  ])
+}
+var staticRenderFns = []
 render._withStripped = true
 
 
