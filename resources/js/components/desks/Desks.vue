@@ -1,14 +1,12 @@
 <template>
     <div class="container">
-        <h1>Достки</h1>
+        <h1>Доски</h1>
         <div class="row">
             <div class="col-lg-4" v-for="desk in desks">
                 <div class="card mt-3">
-                    <a href="#" class="card-body">
-                        <h5 class="card-title">{{ desk.name }}</h5>
-                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                        <a href="#" class="btn btn-primary">Go somewhere</a>
-                    </a>
+                    <router-link class="card-body" :to="{name: 'showDesk', params: {deskId: desk.id}}">
+                        <h2 class="card-title">{{ desk.name }}</h2>
+                    </router-link>
                 </div>
             </div>
 
@@ -16,6 +14,12 @@
         <div class="alert alert-danger" role="alert" v-if="errored">
             Ошибка загрузки данных
         </div>
+        <div style="text-align: center;" v-if="loading">
+            <div class="spinner-border" style="width: 4rem; margin: 0 auto; height: 4rem;" role="status" >
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
     </div>
 </template>
 
@@ -24,7 +28,8 @@ export default {
     data() {
         return {
             desks: [],
-            errored: false
+            errored: false,
+            loading: true
         }
     },
     mounted() {
@@ -35,6 +40,10 @@ export default {
         .catch(error => {
             console.log(error);
             this.errored = true
+        })
+        .finally(() => {
+            // когда все загрузилось
+            this.loading = false
         })
     }
 }
