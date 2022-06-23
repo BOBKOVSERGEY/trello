@@ -5441,6 +5441,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuelidate/lib/validators */ "./node_modules/vuelidate/lib/validators/index.js");
 //
 //
 //
@@ -5466,26 +5467,108 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
       desks: [],
       errored: false,
-      loading: true
+      errors: [],
+      loading: true,
+      name: null
     };
   },
-  mounted: function mounted() {
-    var _this = this;
+  methods: {
+    getAllDesks: function getAllDesks() {
+      var _this = this;
 
-    axios.get('/api/V1/desks').then(function (response) {
-      _this.desks = response.data.data;
-    })["catch"](function (error) {
-      console.log(error);
-      _this.errored = true;
-    })["finally"](function () {
-      // когда все загрузилось
-      _this.loading = false;
-    });
+      axios.get('/api/V1/desks').then(function (response) {
+        _this.desks = response.data.data;
+      })["catch"](function (error) {
+        console.log(error);
+        _this.errored = true;
+      })["finally"](function () {
+        // когда все загрузилось
+        _this.loading = false;
+      });
+    },
+    deleteDesk: function deleteDesk(id) {
+      var _this2 = this;
+
+      if (confirm('Вы действительно хотите удалить доску?')) {
+        axios.post('/api/V1/desks/' + id, {
+          _method: 'DELETE'
+        }).then(function (response) {
+          _this2.desks = [];
+
+          _this2.getAllDesks();
+        })["catch"](function (error) {
+          console.log(error);
+          _this2.errored = true;
+        })["finally"](function () {
+          // когда все загрузилось
+          _this2.loading = false;
+        });
+      }
+    },
+    addNewDesk: function addNewDesk() {
+      var _this3 = this;
+
+      this.$v.$touch();
+
+      if (this.$v.$anyError) {
+        return;
+      }
+
+      axios.post('/api/V1/desks/', {
+        name: this.name
+      }).then(function (response) {
+        _this3.desks = [];
+
+        _this3.getAllDesks();
+
+        _this3.errored = false; //this.name = '';
+      })["catch"](function (error) {
+        console.log(error);
+
+        if (error.response.data.errors.name) {
+          _this3.errors = [];
+
+          _this3.errors.push(error.response.data.errors.name[0]);
+        }
+
+        _this3.errored = true;
+      })["finally"](function () {
+        // когда все загрузилось
+        _this3.loading = false;
+      });
+    }
+  },
+  mounted: function mounted() {
+    this.getAllDesks();
+  },
+  validations: {
+    name: {
+      required: vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.required,
+      maxLength: (0,vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.maxLength)(255)
+    }
   }
 });
 
@@ -5526,19 +5609,64 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: ['deskId'],
   data: function data() {
     return {
       name: null,
+      desk_list_name: null,
       errored: false,
-      loading: true
+      loading: true,
+      desk_lists: []
     };
   },
   methods: {
-    saveName: function saveName() {
+    getDeskLists: function getDeskLists() {
       var _this = this;
+
+      axios.get('/api/V1/desk-lists/', {
+        params: {
+          desk_id: this.deskId
+        }
+      }).then(function (response) {
+        _this.desk_lists = response.data.data;
+      })["catch"](function (error) {
+        console.log(error);
+        _this.errored = true;
+      })["finally"](function () {
+        // когда все загрузилось
+        _this.loading = false;
+      });
+    },
+    saveName: function saveName() {
+      var _this2 = this;
 
       this.$v.$touch();
 
@@ -5551,28 +5679,79 @@ __webpack_require__.r(__webpack_exports__);
         name: this.name
       }).then(function (response) {})["catch"](function (error) {
         console.log(error);
-        _this.errored = true;
+        _this2.errored = true;
       })["finally"](function () {
         // когда все загрузилось
-        _this.loading = false;
+        _this2.loading = false;
       });
+    },
+    addNewDeskList: function addNewDeskList() {
+      var _this3 = this;
+
+      this.$v.$touch();
+
+      if (this.$v.$anyError) {
+        return;
+      }
+
+      axios.post('/api/V1/desk-lists/', {
+        name: this.desk_list_name,
+        desk_id: this.deskId
+      }).then(function (response) {
+        //this.desk_list_name = '';
+        _this3.desk_lists = [];
+
+        _this3.getDeskLists();
+
+        _this3.errored = false;
+      })["catch"](function (error) {
+        console.log(error.response);
+        _this3.errored = true;
+      })["finally"](function () {
+        // когда все загрузилось
+        _this3.loading = false;
+      });
+    },
+    deleteDeskList: function deleteDeskList(id) {
+      var _this4 = this;
+
+      if (confirm('Вы действительно хотите удалить список?')) {
+        axios.post('/api/V1/desk-lists/' + id, {
+          _method: 'DELETE'
+        }).then(function (response) {
+          _this4.desk_lists = [];
+
+          _this4.getDeskLists();
+        })["catch"](function (error) {
+          console.log(error);
+          _this4.errored = true;
+        })["finally"](function () {
+          // когда все загрузилось
+          _this4.loading = false;
+        });
+      }
     }
   },
   mounted: function mounted() {
-    var _this2 = this;
+    var _this5 = this;
 
     axios.get('/api/V1/desks/' + this.deskId).then(function (response) {
-      _this2.name = response.data.data.name;
+      _this5.name = response.data.data.name;
     })["catch"](function (error) {
       console.log(error);
-      _this2.errored = true;
+      _this5.errored = true;
     })["finally"](function () {
       // когда все загрузилось
-      _this2.loading = false;
+      _this5.loading = false;
     });
+    this.getDeskLists();
   },
   validations: {
     name: {
+      required: vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.required,
+      maxLength: (0,vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.maxLength)(255)
+    },
+    desk_list_name: {
       required: vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.required,
       maxLength: (0,vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.maxLength)(255)
     }
@@ -28557,6 +28736,88 @@ var render = function () {
     _c("h1", [_vm._v("Доски")]),
     _vm._v(" "),
     _c(
+      "form",
+      {
+        on: {
+          submit: function ($event) {
+            $event.preventDefault()
+            return _vm.addNewDesk($event)
+          },
+        },
+      },
+      [
+        _c("div", { staticClass: "mb-3" }, [
+          _c("input", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.name,
+                expression: "name",
+              },
+            ],
+            staticClass: "form-control",
+            class: { "is-invalid": _vm.$v.name.$error },
+            attrs: { type: "text", placeholder: "Введите название достки" },
+            domProps: { value: _vm.name },
+            on: {
+              input: function ($event) {
+                if ($event.target.composing) {
+                  return
+                }
+                _vm.name = $event.target.value
+              },
+            },
+          }),
+          _vm._v(" "),
+          !_vm.$v.name.required
+            ? _c("div", { staticClass: "invalid-feedback" }, [
+                _vm._v("\n                Обязательное поле\n            "),
+              ])
+            : _vm._e(),
+          _vm._v(" "),
+          !_vm.$v.name.maxLength
+            ? _c("div", { staticClass: "invalid-feedback" }, [
+                _vm._v(
+                  "\n                Максимальное кол-во символов: " +
+                    _vm._s(_vm.$v.name.$params.maxLength.max) +
+                    "\n            "
+                ),
+              ])
+            : _vm._e(),
+        ]),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-success",
+            attrs: { type: "submit" },
+            model: {
+              value: _vm.name,
+              callback: function ($$v) {
+                _vm.name = $$v
+              },
+              expression: "name",
+            },
+          },
+          [_vm._v("Добавить доску")]
+        ),
+      ]
+    ),
+    _vm._v(" "),
+    _vm.errored
+      ? _c(
+          "div",
+          { staticClass: "alert alert-danger mt-3", attrs: { role: "alert" } },
+          [
+            _vm._v("\n        Ошибка загрузки данных"),
+            _c("br"),
+            _vm._v("\n        " + _vm._s(_vm.errors[0]) + "\n    "),
+          ]
+        )
+      : _vm._e(),
+    _vm._v(" "),
+    _c(
       "div",
       { staticClass: "row" },
       _vm._l(_vm.desks, function (desk) {
@@ -28568,16 +28829,34 @@ var render = function () {
               _c(
                 "router-link",
                 {
-                  staticClass: "card-body",
+                  staticClass: "card-body nav-link",
                   attrs: {
                     to: { name: "showDesk", params: { deskId: desk.id } },
                   },
                 },
                 [
+                  _c("small", [
+                    _vm._v(_vm._s(new Date(desk.created_at).toLocaleString())),
+                  ]),
+                  _vm._v(" "),
                   _c("h2", { staticClass: "card-title" }, [
                     _vm._v(_vm._s(desk.name)),
                   ]),
                 ]
+              ),
+              _vm._v(" "),
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-danger btn-sm",
+                  attrs: { type: "button" },
+                  on: {
+                    click: function ($event) {
+                      return _vm.deleteDesk(desk.id)
+                    },
+                  },
+                },
+                [_vm._v("Удалить")]
               ),
             ],
             1
@@ -28586,14 +28865,6 @@ var render = function () {
       }),
       0
     ),
-    _vm._v(" "),
-    _vm.errored
-      ? _c(
-          "div",
-          { staticClass: "alert alert-danger", attrs: { role: "alert" } },
-          [_vm._v("\n        Ошибка загрузки данных\n    ")]
-        )
-      : _vm._e(),
     _vm._v(" "),
     _vm.loading
       ? _c("div", { staticStyle: { "text-align": "center" } }, [_vm._m(0)])
@@ -28639,6 +28910,8 @@ var render = function () {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "container" }, [
+    _c("h1", [_vm._v(_vm._s(_vm.name))]),
+    _vm._v(" "),
     _c("div", { staticClass: "mb-3" }, [
       _c(
         "label",
@@ -28689,6 +28962,117 @@ var render = function () {
           ])
         : _vm._e(),
     ]),
+    _vm._v(" "),
+    _c(
+      "form",
+      {
+        on: {
+          submit: function ($event) {
+            $event.preventDefault()
+            return _vm.addNewDeskList($event)
+          },
+        },
+      },
+      [
+        _c("div", { staticClass: "mb-3" }, [
+          _c("input", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.desk_list_name,
+                expression: "desk_list_name",
+              },
+            ],
+            staticClass: "form-control",
+            class: { "is-invalid": _vm.$v.desk_list_name.$error },
+            attrs: { type: "text", placeholder: "Введите название списка" },
+            domProps: { value: _vm.desk_list_name },
+            on: {
+              input: function ($event) {
+                if ($event.target.composing) {
+                  return
+                }
+                _vm.desk_list_name = $event.target.value
+              },
+            },
+          }),
+          _vm._v(" "),
+          !_vm.$v.desk_list_name.required
+            ? _c("div", { staticClass: "invalid-feedback" }, [
+                _vm._v("\n                Обязательное поле\n            "),
+              ])
+            : _vm._e(),
+          _vm._v(" "),
+          !_vm.$v.desk_list_name.maxLength
+            ? _c("div", { staticClass: "invalid-feedback" }, [
+                _vm._v(
+                  "\n                Максимальное кол-во символов: " +
+                    _vm._s(_vm.$v.desk_list_name.$params.maxLength.max) +
+                    "\n            "
+                ),
+              ])
+            : _vm._e(),
+        ]),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-success",
+            attrs: { type: "submit" },
+            model: {
+              value: _vm.name,
+              callback: function ($$v) {
+                _vm.name = $$v
+              },
+              expression: "name",
+            },
+          },
+          [_vm._v("Добавить список")]
+        ),
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      { staticClass: "row" },
+      _vm._l(_vm.desk_lists, function (desk_list) {
+        return _c("div", { staticClass: "col-lg-4" }, [
+          _c("div", { staticClass: "card mt-3" }, [
+            _c(
+              "a",
+              { staticClass: "card-body nav-link", attrs: { href: "" } },
+              [
+                _c("small", [
+                  _vm._v(
+                    _vm._s(new Date(desk_list.created_at).toLocaleString())
+                  ),
+                ]),
+                _vm._v(" "),
+                _c("h2", { staticClass: "card-title" }, [
+                  _vm._v(_vm._s(desk_list.name)),
+                ]),
+              ]
+            ),
+            _vm._v(" "),
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-danger btn-sm",
+                attrs: { type: "button" },
+                on: {
+                  click: function ($event) {
+                    return _vm.deleteDeskList(desk_list.id)
+                  },
+                },
+              },
+              [_vm._v("Удалить")]
+            ),
+          ]),
+        ])
+      }),
+      0
+    ),
     _vm._v(" "),
     _vm.errored
       ? _c(
