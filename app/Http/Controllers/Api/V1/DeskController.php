@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DeskStoreRequest;
+use App\Http\Requests\DeskUpdateRequest;
 use App\Http\Resources\DeskResource;
 use App\Models\Desk;
 use Illuminate\Http\Request;
@@ -20,9 +21,6 @@ class DeskController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     *
      * @param DeskStoreRequest $request
      * @return DeskResource
      */

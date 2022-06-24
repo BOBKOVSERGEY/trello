@@ -1,6 +1,5 @@
-https://www.youtube.com/watch?v=-Pm7V8U8icQ&list=PLze7bMjv1CYtP6FSv6L60IpI3rynxAStr&index=5
-
-07:19
+https://www.youtube.com/watch?v=I6SB_Sro0iE&list=PLze7bMjv1CYtP6FSv6L60IpI3rynxAStr&index=9
+10:26
 
 # Внесение изменений в миграции
 php artisan migrate:refresh

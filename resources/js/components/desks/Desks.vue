@@ -101,7 +101,7 @@ export default {
                     //this.name = '';
                 })
                 .catch(error => {
-                    console.log(error);
+                    console.log(error.response);
                     if(error.response.data.errors.name) {
                         this.errors = [];
                         this.errors.push(error.response.data.errors.name[0])

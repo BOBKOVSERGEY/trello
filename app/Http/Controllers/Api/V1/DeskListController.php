@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DeskListStoreRequest;
+use App\Http\Requests\DeskListUpdateRequest;
 use App\Http\Resources\DeskListResource;
 use App\Models\DeskList;
 use Illuminate\Http\Request;
@@ -48,16 +49,11 @@ class DeskListController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+
+    public function update(DeskListUpdateRequest $request, DeskList $deskList)
     {
-        //
+        $deskList->update($request->validated());
+        return new DeskListResource($deskList);
     }
 
 

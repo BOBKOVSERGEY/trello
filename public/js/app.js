@@ -5546,7 +5546,7 @@ __webpack_require__.r(__webpack_exports__);
 
         _this3.errored = false; //this.name = '';
       })["catch"](function (error) {
-        console.log(error);
+        console.log(error.response);
 
         if (error.response.data.errors.name) {
           _this3.errors = [];
@@ -5635,6 +5635,30 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: ['deskId'],
@@ -5644,19 +5668,26 @@ __webpack_require__.r(__webpack_exports__);
       desk_list_name: null,
       errored: false,
       loading: true,
-      desk_lists: []
+      desk_lists: [],
+      desk_list_input_id: null,
+      card_names: []
     };
   },
   methods: {
-    getDeskLists: function getDeskLists() {
+    /* addNewCard(desk_list_id) {
+         this.$v.card_names.$each[desk_list_id].$touch()
+         if(this.$v.card_names.$each[desk_list_id].$anyError) {
+             return;
+         }
+     },*/
+    updateDescList: function updateDescList(id, name) {
       var _this = this;
 
-      axios.get('/api/V1/desk-lists/', {
-        params: {
-          desk_id: this.deskId
-        }
+      axios.post('/api/V1/desk-lists/' + id, {
+        _method: 'PUT',
+        name: name
       }).then(function (response) {
-        _this.desk_lists = response.data.data;
+        _this.desk_list_input_id = null;
       })["catch"](function (error) {
         console.log(error);
         _this.errored = true;
@@ -5665,12 +5696,33 @@ __webpack_require__.r(__webpack_exports__);
         _this.loading = false;
       });
     },
-    saveName: function saveName() {
+    getDeskLists: function getDeskLists() {
       var _this2 = this;
 
-      this.$v.$touch();
+      axios.get('/api/V1/desk-lists/', {
+        params: {
+          desk_id: this.deskId
+        }
+      }).then(function (response) {
+        _this2.desk_lists = response.data.data;
 
-      if (this.$v.$anyError) {
+        _this2.desk_lists.forEach(function (el) {
+          _this2.card_names[el.id] = '';
+        });
+      })["catch"](function (error) {
+        console.log(error);
+        _this2.errored = true;
+      })["finally"](function () {
+        // когда все загрузилось
+        _this2.loading = false;
+      });
+    },
+    saveName: function saveName() {
+      var _this3 = this;
+
+      this.$v.name.$touch();
+
+      if (this.$v.name.$anyError) {
         return;
       }
 
@@ -5679,18 +5731,18 @@ __webpack_require__.r(__webpack_exports__);
         name: this.name
       }).then(function (response) {})["catch"](function (error) {
         console.log(error);
-        _this2.errored = true;
+        _this3.errored = true;
       })["finally"](function () {
         // когда все загрузилось
-        _this2.loading = false;
+        _this3.loading = false;
       });
     },
     addNewDeskList: function addNewDeskList() {
-      var _this3 = this;
+      var _this4 = this;
 
-      this.$v.$touch();
+      this.$v.desk_list_name.$touch();
 
-      if (this.$v.$anyError) {
+      if (this.$v.desk_list_name.$anyError) {
         return;
       }
 
@@ -5699,50 +5751,50 @@ __webpack_require__.r(__webpack_exports__);
         desk_id: this.deskId
       }).then(function (response) {
         //this.desk_list_name = '';
-        _this3.desk_lists = [];
+        _this4.desk_lists = [];
 
-        _this3.getDeskLists();
+        _this4.getDeskLists();
 
-        _this3.errored = false;
+        _this4.errored = false;
       })["catch"](function (error) {
         console.log(error.response);
-        _this3.errored = true;
+        _this4.errored = true;
       })["finally"](function () {
         // когда все загрузилось
-        _this3.loading = false;
+        _this4.loading = false;
       });
     },
     deleteDeskList: function deleteDeskList(id) {
-      var _this4 = this;
+      var _this5 = this;
 
       if (confirm('Вы действительно хотите удалить список?')) {
         axios.post('/api/V1/desk-lists/' + id, {
           _method: 'DELETE'
         }).then(function (response) {
-          _this4.desk_lists = [];
+          _this5.desk_lists = [];
 
-          _this4.getDeskLists();
+          _this5.getDeskLists();
         })["catch"](function (error) {
           console.log(error);
-          _this4.errored = true;
+          _this5.errored = true;
         })["finally"](function () {
           // когда все загрузилось
-          _this4.loading = false;
+          _this5.loading = false;
         });
       }
     }
   },
   mounted: function mounted() {
-    var _this5 = this;
+    var _this6 = this;
 
     axios.get('/api/V1/desks/' + this.deskId).then(function (response) {
-      _this5.name = response.data.data.name;
+      _this6.name = response.data.data.name;
     })["catch"](function (error) {
       console.log(error);
-      _this5.errored = true;
+      _this6.errored = true;
     })["finally"](function () {
       // когда все загрузилось
-      _this5.loading = false;
+      _this6.loading = false;
     });
     this.getDeskLists();
   },
@@ -5754,6 +5806,12 @@ __webpack_require__.r(__webpack_exports__);
     desk_list_name: {
       required: vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.required,
       maxLength: (0,vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.maxLength)(255)
+    },
+    card_names: {
+      $each: {
+        required: vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.required,
+        maxLength: (0,vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.maxLength)(255)
+      }
     }
   }
 });
@@ -28975,6 +29033,15 @@ var render = function () {
       },
       [
         _c("div", { staticClass: "mb-3" }, [
+          _c(
+            "label",
+            {
+              staticClass: "form-label",
+              attrs: { for: "exampleFormControlInput2" },
+            },
+            [_vm._v("Введите название списка")]
+          ),
+          _vm._v(" "),
           _c("input", {
             directives: [
               {
@@ -28986,7 +29053,11 @@ var render = function () {
             ],
             staticClass: "form-control",
             class: { "is-invalid": _vm.$v.desk_list_name.$error },
-            attrs: { type: "text", placeholder: "Введите название списка" },
+            attrs: {
+              type: "text",
+              placeholder: "Введите название списка",
+              id: "exampleFormControlInput2",
+            },
             domProps: { value: _vm.desk_list_name },
             on: {
               input: function ($event) {
@@ -29021,11 +29092,11 @@ var render = function () {
             staticClass: "btn btn-success",
             attrs: { type: "submit" },
             model: {
-              value: _vm.name,
+              value: _vm.desk_list_name,
               callback: function ($$v) {
-                _vm.name = $$v
+                _vm.desk_list_name = $$v
               },
-              expression: "name",
+              expression: "desk_list_name",
             },
           },
           [_vm._v("Добавить список")]
@@ -29038,35 +29109,121 @@ var render = function () {
       { staticClass: "row" },
       _vm._l(_vm.desk_lists, function (desk_list) {
         return _c("div", { staticClass: "col-lg-4" }, [
-          _c("div", { staticClass: "card mt-3" }, [
-            _c(
-              "a",
-              { staticClass: "card-body nav-link", attrs: { href: "" } },
-              [
-                _c("small", [
-                  _vm._v(
-                    _vm._s(new Date(desk_list.created_at).toLocaleString())
-                  ),
-                ]),
-                _vm._v(" "),
-                _c("h2", { staticClass: "card-title" }, [
-                  _vm._v(_vm._s(desk_list.name)),
-                ]),
-              ]
-            ),
-            _vm._v(" "),
-            _c(
-              "button",
-              {
-                staticClass: "btn btn-danger btn-sm",
-                attrs: { type: "button" },
+          _c("div", { staticClass: "card mt-3 p-3" }, [
+            _c("div", { staticClass: "d-flex align-items-center" }, [
+              _c("i", {
+                staticClass: "fa-solid fa-pen text-success",
+                staticStyle: {
+                  "font-size": "15px",
+                  cursor: "pointer",
+                  "margin-left": "auto",
+                },
+                on: {
+                  click: function ($event) {
+                    _vm.desk_list_input_id = desk_list.id
+                  },
+                },
+              }),
+              _vm._v(" "),
+              _c("i", {
+                staticClass: "fa-solid fa-trash-can text-danger",
+                staticStyle: {
+                  "font-size": "15px",
+                  cursor: "pointer",
+                  "margin-left": "10px",
+                },
                 on: {
                   click: function ($event) {
                     return _vm.deleteDeskList(desk_list.id)
                   },
                 },
-              },
-              [_vm._v("Удалить")]
+              }),
+            ]),
+            _vm._v(" "),
+            _c("small", [
+              _vm._v(_vm._s(new Date(desk_list.created_at).toLocaleString())),
+            ]),
+            _vm._v(" "),
+            _vm.desk_list_input_id == desk_list.id
+              ? _c(
+                  "form",
+                  {
+                    staticClass: "mt-3 d-flex align-items-center",
+                    on: {
+                      submit: function ($event) {
+                        $event.preventDefault()
+                        return _vm.updateDescList(desk_list.id, desk_list.name)
+                      },
+                    },
+                  },
+                  [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: desk_list.name,
+                          expression: "desk_list.name",
+                        },
+                      ],
+                      staticClass: "form-control",
+                      attrs: {
+                        type: "text",
+                        placeholder: "Введите название списка",
+                      },
+                      domProps: { value: desk_list.name },
+                      on: {
+                        input: function ($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(desk_list, "name", $event.target.value)
+                        },
+                      },
+                    }),
+                    _vm._v(" "),
+                    _c(
+                      "i",
+                      {
+                        staticClass: "fa-solid fa-xmark-large text-danger",
+                        staticStyle: {
+                          "font-size": "17px",
+                          cursor: "pointer",
+                          "margin-left": "10px",
+                        },
+                        on: {
+                          click: function ($event) {
+                            _vm.desk_list_input_id = null
+                          },
+                        },
+                      },
+                      [_vm._v("×")]
+                    ),
+                  ]
+                )
+              : _c(
+                  "h2",
+                  { staticClass: "card-title d-flex justify-content-between" },
+                  [_vm._v(_vm._s(desk_list.name) + " ")]
+                ),
+            _vm._v(" "),
+            _c(
+              "ul",
+              { staticClass: "list-group list-group-flush my-3" },
+              _vm._l(desk_list.cards, function (card) {
+                return _c(
+                  "li",
+                  { key: card.id, staticClass: "list-group-item" },
+                  [
+                    _vm._v(
+                      "\n                        " +
+                        _vm._s(card.name) +
+                        "\n                    "
+                    ),
+                  ]
+                )
+              }),
+              0
             ),
           ]),
         ])

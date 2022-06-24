@@ -18,7 +18,7 @@ class CardFactory extends Factory
     {
         return [
             'name' => $this->faker->sentence($nbWords = 2, $variableNbWords = true),
-            'desk_list_id' => $this->faker->numberBetween(1,50),
+            'desk_list_id' => $this->faker->numberBetween(60,62),
             'created_at' => $this->faker->dateTime(),
             'updated_at' => $this->faker->dateTime(),
         ];
