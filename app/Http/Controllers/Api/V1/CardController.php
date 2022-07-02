@@ -3,7 +3,12 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CardStoreRequest;
+use App\Http\Resources\CardResource;
+use App\Models\Card;
+use App\Models\Desk;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class CardController extends Controller
 {
@@ -17,48 +22,39 @@ class CardController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param CardStoreRequest $request
+     * @return CardResource
      */
-    public function show($id)
+    public function store(CardStoreRequest $request)
     {
-        //
+        $newCard = Card::create($request->validated());
+
+        return new CardResource($newCard);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+
+    public function show(Card $card)
     {
-        //
+        return new CardResource($card);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+
+    public function update(CardStoreRequest $request, Card $card)
     {
-        //
+        $card->update($request->validated());
+        return new CardResource($card);
+    }
+
+
+    /**
+     * @param Card $card
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|Response
+     */
+    public function destroy(Card $card)
+    {
+        $card->delete();
+        return response(null, Response::HTTP_NO_CONTENT);
     }
 }

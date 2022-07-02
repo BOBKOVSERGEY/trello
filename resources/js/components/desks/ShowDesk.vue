@@ -25,6 +25,9 @@
 
             <button type="submit" v-model="desk_list_name" class="btn btn-success">Добавить список</button>
         </form>
+        <div class="alert alert-danger" role="alert" v-if="errored">
+            Ошибка загрузки данных
+        </div>
         <div class="row">
             <div class="col-lg-4" v-for="desk_list in desk_lists">
                 <div class="card mt-3 p-3">
@@ -40,9 +43,9 @@
                     </form>
 
                     <h2 v-else class="card-title d-flex justify-content-between">{{ desk_list.name }} </h2>
-                    <!--<form @submit.prevent="addNewCard(desk_list.id)" >
+                    <form @submit.prevent="addNewCard(desk_list.id)" >
                         <div class="mt-3">
-                            <input type="text" class="form-control" v-model="card_names[desk_list.id]" :class="{ 'is-invalid': $v.card_names.$each[desk_list.id].$error }"placeholder="" >
+                            <input type="text" class="form-control" v-model="card_names[desk_list.id]" :class="{ 'is-invalid': $v.card_names.$each[desk_list.id].$error }" placeholder="Введите название новой карточки" >
                             <div class="invalid-feedback" v-if="!$v.card_names.$each[desk_list.id].required">
                                 Обязательное поле
                             </div>
@@ -50,18 +53,42 @@
                                 Максимальное кол-во символов: {{$v.card_names.$each[desk_list.id].$params.maxLength.max}}
                             </div>
                         </div>
-                    </form>-->
+                    </form>
+                    <!-- Button trigger modal -->
+
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <form @submit.prevent="updateCardName" v-if="show_card_name_input" class="mt-3 d-flex align-items-center">
+                                        <input type="text" class="form-control" v-model="current_card.name" :class="{ 'is-invalid': $v.current_card.name.$error }" placeholder="Введите название карточки" >
+                                        <i class="fa-solid fa-xmark-large text-danger" @click="show_card_name_input = false" style="font-size: 17px; cursor: pointer; margin-left: 10px;">&times;</i>
+                                    </form>
+
+                                    <h5 class="modal-title d-flex align-items-center" id="staticBackdropLabel" v-if="!show_card_name_input">
+                                        <i class="fa-solid fa-pen text-success" style="font-size: 15px; cursor: pointer; margin-right: 10px;" @click="show_card_name_input = true"></i>
+                                        <span>{{ current_card.name }}</span>
+                                    </h5>
+
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    ...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <ul class="list-group list-group-flush my-3">
-                        <li class="list-group-item" v-for="card in desk_list.cards" :key="card.id">
-                            {{ card.name }}
+                        <li class="list-group-item d-flex align-items-center" v-for="card in desk_list.cards" :key="card.id">
+                            <div style="margin-right: 5px; cursor: pointer; width: 100%;" @click="getCard(card.id)" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ card.name }}</div>
+                            <i class="fa-solid fa-trash-can text-secondary" style="font-size: 12px; cursor: pointer; margin-left: auto;" @click="deleteCard(card.id)"></i>
                         </li>
                     </ul>
                 </div>
             </div>
 
-        </div>
-        <div class="alert alert-danger" role="alert" v-if="errored">
-            Ошибка загрузки данных
         </div>
         <div style="text-align: center;" v-if="loading">
             <div class="spinner-border" style="width: 4rem; margin: 0 auto; height: 4rem;" role="status" >
@@ -85,16 +112,86 @@ export default {
             loading: true,
             desk_lists: [],
             desk_list_input_id: null,
-            card_names: []
+            card_names: [],
+            current_card: [],
+            show_card_name_input: false
         }
     },
     methods: {
-       /* addNewCard(desk_list_id) {
+        updateCardName() {
+            this.$v.current_card.name.$touch()
+            if(this.$v.current_card.name.$anyError) {
+                return;
+            }
+            axios.post('/api/V1/cards/' + this.current_card.id, {
+                _method: 'PATCH',
+                name: this.current_card.name,
+                desk_list_id: this.current_card.desk_list_id,
+            })
+                .then(response => {
+                    this.show_card_name_input = false;
+                    this.$v.$reset();
+                    this.getDeskLists()
+                })
+                .catch(error => {
+                    console.log(error);
+                    this.errored = true
+                })
+        },
+        getCard(id) {
+            axios.get('/api/V1/cards/' + id)
+                .then(response => {
+                    this.current_card = response.data.data
+                    console.log(this.current_card);
+                })
+                .catch(error => {
+                    console.log(error);
+                    this.errored = true
+                })
+                .finally(() => {
+                    // когда все загрузилось
+                    this.loading = false
+                })
+        },
+        deleteCard(id) {
+            axios.post('/api/V1/cards/' + id, {
+                _method: 'DELETE'
+            })
+                .then(response => {
+                    this.getDeskLists()
+                })
+                .catch(error => {
+                    console.log(error);
+                    this.errored = true
+                })
+                .finally(() => {
+                    // когда все загрузилось
+                    this.loading = false
+                })
+        },
+       addNewCard(desk_list_id) {
+
             this.$v.card_names.$each[desk_list_id].$touch()
             if(this.$v.card_names.$each[desk_list_id].$anyError) {
                 return;
             }
-        },*/
+           axios.post('/api/V1/cards/', {
+               name: this.card_names[desk_list_id],
+               desk_list_id
+           })
+               .then(response => {
+                   this.$v.$reset();
+                   this.getDeskLists()
+               })
+               .catch(error => {
+                   console.log(error);
+                   this.errored = true
+               })
+               .finally(() => {
+                   // когда все загрузилось
+                   this.loading = false
+               })
+        },
         updateDescList(id, name) {
             axios.post('/api/V1/desk-lists/'+id, {
                 _method: 'PUT',
@@ -121,7 +218,8 @@ export default {
                 .then(response => {
                     this.desk_lists = response.data.data
                     this.desk_lists.forEach(el=> {
-                        this.card_names[el.id] = ''
+                        //this.card_names[el.id] = ''
+                        this.$set(this.card_names, el.id, '')
                     })
                 })
                 .catch(error => {
@@ -143,7 +241,7 @@ export default {
                   name: this.name
               })
                   .then(response => {
-
+                      this.$v.$reset();
                   })
                   .catch(error => {
                       console.log(error);
@@ -164,7 +262,8 @@ export default {
                 desk_id: this.deskId
             })
                 .then(response => {
-                    //this.desk_list_name = '';
+                    this.$v.$reset();
+                    this.desk_list_name = '';
                     this.desk_lists = [];
                     this.getDeskLists();
                     this.errored = false
@@ -226,6 +325,12 @@ export default {
         },
         card_names: {
             $each: {
+                required,
+                maxLength: maxLength(255)
+            }
+        },
+        current_card: {
+            name: {
                 required,
                 maxLength: maxLength(255)
             }

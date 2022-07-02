@@ -22,10 +22,12 @@
             <div class="col-lg-4" v-for="desk in desks">
                 <div class="card mt-3">
                     <router-link class="card-body nav-link" :to="{name: 'showDesk', params: {deskId: desk.id}}">
+                        <div class="d-flex align-items-center">
+                            <i class="fa-solid fa-trash-can text-danger" style="font-size: 15px; cursor: pointer; margin-left: auto;" @click="deleteDesk(desk.id)"></i>
+                        </div>
                         <small>{{ new Date(desk.created_at).toLocaleString()}}</small>
                         <h2 class="card-title">{{ desk.name }}</h2>
                     </router-link>
-                    <button type="button" class="btn btn-danger btn-sm" @click="deleteDesk(desk.id)">Удалить</button>
                 </div>
             </div>
 

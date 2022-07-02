@@ -13,7 +13,7 @@ class CardStoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,8 @@ class CardStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'name' => 'required|max:255',
+            'desk_list_id' => 'required|integer|exists:desk_lists,id',
         ];
     }
 }
