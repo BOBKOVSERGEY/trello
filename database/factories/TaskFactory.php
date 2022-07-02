@@ -18,7 +18,7 @@ class TaskFactory extends Factory
     {
         return [
             'name' => $this->faker->sentence($nbWords = 8, $variableNbWords = true),
-            'card_id' => $this->faker->numberBetween(1,100),
+            'card_id' => $this->faker->numberBetween(101,111),
             'created_at' => $this->faker->dateTime(),
             'updated_at' => $this->faker->dateTime(),
         ];

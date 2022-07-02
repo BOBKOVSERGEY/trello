@@ -5688,6 +5688,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: ['deskId'],
@@ -5714,6 +5717,7 @@ __webpack_require__.r(__webpack_exports__);
         return;
       }
 
+      this.show_card_name_input = false;
       axios.post('/api/V1/cards/' + this.current_card.id, {
         _method: 'PATCH',
         name: this.current_card.name,
@@ -5733,8 +5737,7 @@ __webpack_require__.r(__webpack_exports__);
       var _this2 = this;
 
       axios.get('/api/V1/cards/' + id).then(function (response) {
-        _this2.current_card = response.data.data;
-        console.log(_this2.current_card);
+        _this2.current_card = response.data.data; //console.log(this.current_card)
       })["catch"](function (error) {
         console.log(error);
         _this2.errored = true;
@@ -5785,6 +5788,14 @@ __webpack_require__.r(__webpack_exports__);
     updateDescList: function updateDescList(id, name) {
       var _this5 = this;
 
+      this.$v.desk_lists.$touch();
+
+      if (this.$v.desk_lists.$anyError) {
+        return;
+      } //$v.desk_lists.$each[index].name
+
+
+      this.desk_list_input_id = null;
       axios.post('/api/V1/desk-lists/' + id, {
         _method: 'PUT',
         name: name
@@ -5924,6 +5935,14 @@ __webpack_require__.r(__webpack_exports__);
       name: {
         required: vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.required,
         maxLength: (0,vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.maxLength)(255)
+      }
+    },
+    desk_lists: {
+      $each: {
+        name: {
+          required: vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.required,
+          maxLength: (0,vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.maxLength)(255)
+        }
       }
     }
   }
@@ -29230,7 +29249,7 @@ var render = function () {
     _c(
       "div",
       { staticClass: "row" },
-      _vm._l(_vm.desk_lists, function (desk_list) {
+      _vm._l(_vm.desk_lists, function (desk_list, index) {
         return _c("div", { staticClass: "col-lg-4" }, [
           _c("div", { staticClass: "card mt-3 p-3" }, [
             _c("div", { staticClass: "d-flex align-items-center" }, [
@@ -29290,6 +29309,10 @@ var render = function () {
                         },
                       ],
                       staticClass: "form-control",
+                      class: {
+                        "is-invalid":
+                          _vm.$v.desk_lists.$each[index].name.$error,
+                      },
                       attrs: {
                         type: "text",
                         placeholder: "Введите название списка",
@@ -29316,7 +29339,10 @@ var render = function () {
                         },
                         on: {
                           click: function ($event) {
-                            _vm.desk_list_input_id = null
+                            return _vm.updateDescList(
+                              desk_list.id,
+                              desk_list.name
+                            )
                           },
                         },
                       },
@@ -29478,11 +29504,7 @@ var render = function () {
                                       cursor: "pointer",
                                       "margin-left": "10px",
                                     },
-                                    on: {
-                                      click: function ($event) {
-                                        _vm.show_card_name_input = false
-                                      },
-                                    },
+                                    on: { click: _vm.updateCardName },
                                   },
                                   [_vm._v("×")]
                                 ),
@@ -29530,11 +29552,33 @@ var render = function () {
                         }),
                       ]),
                       _vm._v(" "),
-                      _c("div", { staticClass: "modal-body" }, [
-                        _vm._v(
-                          "\n                                ...\n                            "
-                        ),
-                      ]),
+                      _c(
+                        "div",
+                        { staticClass: "modal-body" },
+                        _vm._l(_vm.current_card.tasks, function (task, index) {
+                          return _c("div", { staticClass: "mb-3 form-check" }, [
+                            _c("input", {
+                              staticClass: "form-check-input",
+                              attrs: {
+                                type: "checkbox",
+                                id: "exampleInputPassword" + task.id,
+                              },
+                            }),
+                            _vm._v(" "),
+                            _c(
+                              "label",
+                              {
+                                staticClass: "form-check-label",
+                                attrs: {
+                                  for: "exampleInputPassword" + task.id,
+                                },
+                              },
+                              [_vm._v(_vm._s(task.name))]
+                            ),
+                          ])
+                        }),
+                        0
+                      ),
                     ]),
                   ]
                 ),

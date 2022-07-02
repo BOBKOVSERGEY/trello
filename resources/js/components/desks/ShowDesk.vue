@@ -29,7 +29,7 @@
             Ошибка загрузки данных
         </div>
         <div class="row">
-            <div class="col-lg-4" v-for="desk_list in desk_lists">
+            <div class="col-lg-4" v-for="(desk_list, index) in desk_lists">
                 <div class="card mt-3 p-3">
                         <div class="d-flex align-items-center">
                             <i class="fa-solid fa-pen text-success" style="font-size: 15px; cursor: pointer; margin-left: auto;" @click="desk_list_input_id = desk_list.id"></i>
@@ -38,8 +38,8 @@
                         <small>{{ new Date(desk_list.created_at).toLocaleString()}}</small>
 
                     <form @submit.prevent="updateDescList(desk_list.id, desk_list.name)" v-if="desk_list_input_id == desk_list.id" class="mt-3 d-flex align-items-center">
-                        <input type="text" class="form-control" v-model="desk_list.name" placeholder="Введите название списка" >
-                        <i class="fa-solid fa-xmark-large text-danger" style="font-size: 17px; cursor: pointer; margin-left: 10px;" @click="desk_list_input_id = null">&times;</i>
+                        <input type="text" class="form-control" v-model="desk_list.name" placeholder="Введите название списка" :class="{ 'is-invalid': $v.desk_lists.$each[index].name.$error }">
+                        <i class="fa-solid fa-xmark-large text-danger" style="font-size: 17px; cursor: pointer; margin-left: 10px;" @click="updateDescList(desk_list.id, desk_list.name)">&times;</i>
                     </form>
 
                     <h2 v-else class="card-title d-flex justify-content-between">{{ desk_list.name }} </h2>
@@ -64,7 +64,7 @@
                                 <div class="modal-header">
                                     <form @submit.prevent="updateCardName" v-if="show_card_name_input" class="mt-3 d-flex align-items-center">
                                         <input type="text" class="form-control" v-model="current_card.name" :class="{ 'is-invalid': $v.current_card.name.$error }" placeholder="Введите название карточки" >
-                                        <i class="fa-solid fa-xmark-large text-danger" @click="show_card_name_input = false" style="font-size: 17px; cursor: pointer; margin-left: 10px;">&times;</i>
+                                        <i class="fa-solid fa-xmark-large text-danger" @click="updateCardName" style="font-size: 17px; cursor: pointer; margin-left: 10px;">&times;</i>
                                     </form>
 
                                     <h5 class="modal-title d-flex align-items-center" id="staticBackdropLabel" v-if="!show_card_name_input">
@@ -75,7 +75,10 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    ...
+                                    <div class="mb-3 form-check" v-for="(task, index) in current_card.tasks">
+                                        <input type="checkbox" class="form-check-input" :id="'exampleInputPassword'+task.id" >
+                                        <label class="form-check-label" :for="'exampleInputPassword' +task.id">{{ task.name }}</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -123,6 +126,7 @@ export default {
             if(this.$v.current_card.name.$anyError) {
                 return;
             }
+            this.show_card_name_input = false
             axios.post('/api/V1/cards/' + this.current_card.id, {
                 _method: 'PATCH',
                 name: this.current_card.name,
@@ -142,7 +146,7 @@ export default {
             axios.get('/api/V1/cards/' + id)
                 .then(response => {
                     this.current_card = response.data.data
-                    console.log(this.current_card);
+                    //console.log(this.current_card)
                 })
                 .catch(error => {
                     console.log(error);
@@ -193,6 +197,13 @@ export default {
                })
         },
         updateDescList(id, name) {
+            this.$v.desk_lists.$touch()
+            if(this.$v.desk_lists.$anyError) {
+                return;
+            }
+
+            //$v.desk_lists.$each[index].name
+            this.desk_list_input_id = null;
             axios.post('/api/V1/desk-lists/'+id, {
                 _method: 'PUT',
                 name: name
@@ -333,6 +344,14 @@ export default {
             name: {
                 required,
                 maxLength: maxLength(255)
+            }
+        },
+        desk_lists: {
+            $each: {
+                name: {
+                    required,
+                    maxLength: maxLength(255)
+                }
             }
         }
     }
