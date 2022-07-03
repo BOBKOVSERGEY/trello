@@ -75,9 +75,33 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
+                                    <form @submit.prevent="addNewTask">
+                                        <div class="mb-3">
+                                            <label for="exampleFormControlInput4" class="form-label">Введите название списка</label>
+                                            <div class="d-flex align-items-center">
+                                                <input type="text" class="form-control" v-model="new_task_name" :class="{ 'is-invalid': $v.new_task_name.$error }"   placeholder="Введите название задачи" id="exampleFormControlInput4">
+                                                <i class="fa-solid fa-floppy-disk text-success" @click="addNewTask" style="font-size: 17px; cursor: pointer; margin-left: 10px;"></i>
+                                            </div>
+                                        </div>
+                                    </form>
                                     <div class="mb-3 form-check" v-for="(task, index) in current_card.tasks">
-                                        <input type="checkbox" class="form-check-input" :id="'exampleInputPassword'+task.id" >
-                                        <label class="form-check-label" :for="'exampleInputPassword' +task.id">{{ task.name }}</label>
+                                        <div class="d-flex align-items-center">
+
+                                            <form @submit.prevent="updateTask(current_card.tasks[index])" v-if="task_input_name_id === task.id" style="width: 100%; margin-right: 10px; margin-left: -24px">
+                                                <input type="text" class="form-control" v-model="current_card.tasks[index].name"  placeholder="Введите название карточки" >
+                                            </form>
+
+                                            <div v-else>
+                                                <input type="checkbox" class="form-check-input" @change="updateTask(current_card.tasks[index])" :id="'exampleInputPassword'+task.id" v-model="current_card.tasks[index].is_done">
+                                                <label class="form-check-label" :for="'exampleInputPassword' +task.id">{{ task.name }}</label>
+                                            </div>
+                                            <div class="d-flex flex-column align-items-center" style="margin-left: auto">
+                                                <i class="fa-solid fa-pen text-success" v-if="task_input_name_id !== task.id" @click="task_input_name_id = task.id" style="font-size: 9px; cursor: pointer; margin-bottom: 5px;" ></i>
+                                                <i class="fa-solid fa-floppy-disk text-info" @click="updateTask(current_card.tasks[index])" style="font-size: 9px; cursor: pointer; margin-bottom: 5px;"></i>
+                                                <i class="fa-solid fa-xmark-large text-danger" @click="deleteTask(task.id)" style="font-size: 12px; cursor: pointer;">&times;</i>
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -117,10 +141,68 @@ export default {
             desk_list_input_id: null,
             card_names: [],
             current_card: [],
-            show_card_name_input: false
+            show_card_name_input: false,
+            new_task_name: '',
+            task_input_name_id: null
         }
     },
     methods: {
+        updateTask(task) {
+            axios.post('/api/V1/tasks/' + task.id, {
+                _method: 'PATCH',
+                name: task.name,
+                is_done: task.is_done,
+                card_id: task.card_id,
+            })
+                .then(response => {
+                    this.task_input_name_id = null
+                    //this.$v.$reset();
+                    //this.getCard(this.current_card.id)
+                })
+                .catch(error => {
+                    console.log(error);
+                    this.errored = true
+                })
+        },
+        deleteTask(id) {
+            axios.post('/api/V1/tasks/' + id, {
+                _method: 'DELETE'
+            })
+                .then(response => {
+                    this.getCard(this.current_card.id);
+                })
+                .catch(error => {
+                    console.log(error);
+                    this.errored = true
+                })
+                .finally(() => {
+                    // когда все загрузилось
+                    this.loading = false
+                })
+        },
+        addNewTask() {
+            this.$v.new_task_name.$touch()
+            if(this.$v.new_task_name.$anyError) {
+                return;
+            }
+            axios.post('/api/V1/tasks/', {
+                name: this.new_task_name,
+                card_id: this.current_card.id
+            })
+                .then(response => {
+                    this.new_task_name =  '';
+                    this.$v.$reset();
+                    this.getCard(this.current_card.id);
+                })
+                .catch(error => {
+                    console.log(error);
+                    this.errored = true
+                })
+                .finally(() => {
+                    // когда все загрузилось
+                    this.loading = false
+                })
+        },
         updateCardName() {
             this.$v.current_card.name.$touch()
             if(this.$v.current_card.name.$anyError) {
@@ -345,6 +427,16 @@ export default {
                 required,
                 maxLength: maxLength(255)
             }
+        },
+        current_task_name: {
+            name: {
+                required,
+                maxLength: maxLength(255)
+            }
+        },
+        new_task_name: {
+            required,
+            maxLength: maxLength(255)
         },
         desk_lists: {
             $each: {

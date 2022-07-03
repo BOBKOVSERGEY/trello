@@ -14,3 +14,13 @@ php artisan make:controller Api/V1/DeskListController --resource --api
 php artisan make:seeder DeskSeeder
 
 php artisan db:seed --class=TaskSeeder
+
+
+# every time
+php artisan make:controller Api/V1/DeskListController --resource --api
+php artisan make:request TaskStoreRequest
+
+#add column in table 
+php artisan make:migration add_is_done_to_tasks_table --table=tasks
+
+

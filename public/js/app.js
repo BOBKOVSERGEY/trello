@@ -5691,6 +5691,30 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: ['deskId'],
@@ -5704,12 +5728,71 @@ __webpack_require__.r(__webpack_exports__);
       desk_list_input_id: null,
       card_names: [],
       current_card: [],
-      show_card_name_input: false
+      show_card_name_input: false,
+      new_task_name: '',
+      task_input_name_id: null
     };
   },
   methods: {
-    updateCardName: function updateCardName() {
+    updateTask: function updateTask(task) {
       var _this = this;
+
+      axios.post('/api/V1/tasks/' + task.id, {
+        _method: 'PATCH',
+        name: task.name,
+        is_done: task.is_done,
+        card_id: task.card_id
+      }).then(function (response) {
+        _this.task_input_name_id = null; //this.$v.$reset();
+        //this.getCard(this.current_card.id)
+      })["catch"](function (error) {
+        console.log(error);
+        _this.errored = true;
+      });
+    },
+    deleteTask: function deleteTask(id) {
+      var _this2 = this;
+
+      axios.post('/api/V1/tasks/' + id, {
+        _method: 'DELETE'
+      }).then(function (response) {
+        _this2.getCard(_this2.current_card.id);
+      })["catch"](function (error) {
+        console.log(error);
+        _this2.errored = true;
+      })["finally"](function () {
+        // когда все загрузилось
+        _this2.loading = false;
+      });
+    },
+    addNewTask: function addNewTask() {
+      var _this3 = this;
+
+      this.$v.new_task_name.$touch();
+
+      if (this.$v.new_task_name.$anyError) {
+        return;
+      }
+
+      axios.post('/api/V1/tasks/', {
+        name: this.new_task_name,
+        card_id: this.current_card.id
+      }).then(function (response) {
+        _this3.new_task_name = '';
+
+        _this3.$v.$reset();
+
+        _this3.getCard(_this3.current_card.id);
+      })["catch"](function (error) {
+        console.log(error);
+        _this3.errored = true;
+      })["finally"](function () {
+        // когда все загрузилось
+        _this3.loading = false;
+      });
+    },
+    updateCardName: function updateCardName() {
+      var _this4 = this;
 
       this.$v.current_card.name.$touch();
 
@@ -5723,46 +5806,46 @@ __webpack_require__.r(__webpack_exports__);
         name: this.current_card.name,
         desk_list_id: this.current_card.desk_list_id
       }).then(function (response) {
-        _this.show_card_name_input = false;
+        _this4.show_card_name_input = false;
 
-        _this.$v.$reset();
+        _this4.$v.$reset();
 
-        _this.getDeskLists();
+        _this4.getDeskLists();
       })["catch"](function (error) {
         console.log(error);
-        _this.errored = true;
+        _this4.errored = true;
       });
     },
     getCard: function getCard(id) {
-      var _this2 = this;
+      var _this5 = this;
 
       axios.get('/api/V1/cards/' + id).then(function (response) {
-        _this2.current_card = response.data.data; //console.log(this.current_card)
+        _this5.current_card = response.data.data; //console.log(this.current_card)
       })["catch"](function (error) {
         console.log(error);
-        _this2.errored = true;
+        _this5.errored = true;
       })["finally"](function () {
         // когда все загрузилось
-        _this2.loading = false;
+        _this5.loading = false;
       });
     },
     deleteCard: function deleteCard(id) {
-      var _this3 = this;
+      var _this6 = this;
 
       axios.post('/api/V1/cards/' + id, {
         _method: 'DELETE'
       }).then(function (response) {
-        _this3.getDeskLists();
+        _this6.getDeskLists();
       })["catch"](function (error) {
         console.log(error);
-        _this3.errored = true;
+        _this6.errored = true;
       })["finally"](function () {
         // когда все загрузилось
-        _this3.loading = false;
+        _this6.loading = false;
       });
     },
     addNewCard: function addNewCard(desk_list_id) {
-      var _this4 = this;
+      var _this7 = this;
 
       this.$v.card_names.$each[desk_list_id].$touch();
 
@@ -5774,19 +5857,19 @@ __webpack_require__.r(__webpack_exports__);
         name: this.card_names[desk_list_id],
         desk_list_id: desk_list_id
       }).then(function (response) {
-        _this4.$v.$reset();
+        _this7.$v.$reset();
 
-        _this4.getDeskLists();
+        _this7.getDeskLists();
       })["catch"](function (error) {
         console.log(error);
-        _this4.errored = true;
+        _this7.errored = true;
       })["finally"](function () {
         // когда все загрузилось
-        _this4.loading = false;
+        _this7.loading = false;
       });
     },
     updateDescList: function updateDescList(id, name) {
-      var _this5 = this;
+      var _this8 = this;
 
       this.$v.desk_lists.$touch();
 
@@ -5800,39 +5883,39 @@ __webpack_require__.r(__webpack_exports__);
         _method: 'PUT',
         name: name
       }).then(function (response) {
-        _this5.desk_list_input_id = null;
+        _this8.desk_list_input_id = null;
       })["catch"](function (error) {
         console.log(error);
-        _this5.errored = true;
+        _this8.errored = true;
       })["finally"](function () {
         // когда все загрузилось
-        _this5.loading = false;
+        _this8.loading = false;
       });
     },
     getDeskLists: function getDeskLists() {
-      var _this6 = this;
+      var _this9 = this;
 
       axios.get('/api/V1/desk-lists/', {
         params: {
           desk_id: this.deskId
         }
       }).then(function (response) {
-        _this6.desk_lists = response.data.data;
+        _this9.desk_lists = response.data.data;
 
-        _this6.desk_lists.forEach(function (el) {
+        _this9.desk_lists.forEach(function (el) {
           //this.card_names[el.id] = ''
-          _this6.$set(_this6.card_names, el.id, '');
+          _this9.$set(_this9.card_names, el.id, '');
         });
       })["catch"](function (error) {
         console.log(error);
-        _this6.errored = true;
+        _this9.errored = true;
       })["finally"](function () {
         // когда все загрузилось
-        _this6.loading = false;
+        _this9.loading = false;
       });
     },
     saveName: function saveName() {
-      var _this7 = this;
+      var _this10 = this;
 
       this.$v.name.$touch();
 
@@ -5844,17 +5927,17 @@ __webpack_require__.r(__webpack_exports__);
         _method: 'PUT',
         name: this.name
       }).then(function (response) {
-        _this7.$v.$reset();
+        _this10.$v.$reset();
       })["catch"](function (error) {
         console.log(error);
-        _this7.errored = true;
+        _this10.errored = true;
       })["finally"](function () {
         // когда все загрузилось
-        _this7.loading = false;
+        _this10.loading = false;
       });
     },
     addNewDeskList: function addNewDeskList() {
-      var _this8 = this;
+      var _this11 = this;
 
       this.$v.desk_list_name.$touch();
 
@@ -5866,53 +5949,53 @@ __webpack_require__.r(__webpack_exports__);
         name: this.desk_list_name,
         desk_id: this.deskId
       }).then(function (response) {
-        _this8.$v.$reset();
+        _this11.$v.$reset();
 
-        _this8.desk_list_name = '';
-        _this8.desk_lists = [];
+        _this11.desk_list_name = '';
+        _this11.desk_lists = [];
 
-        _this8.getDeskLists();
+        _this11.getDeskLists();
 
-        _this8.errored = false;
+        _this11.errored = false;
       })["catch"](function (error) {
         console.log(error.response);
-        _this8.errored = true;
+        _this11.errored = true;
       })["finally"](function () {
         // когда все загрузилось
-        _this8.loading = false;
+        _this11.loading = false;
       });
     },
     deleteDeskList: function deleteDeskList(id) {
-      var _this9 = this;
+      var _this12 = this;
 
       if (confirm('Вы действительно хотите удалить список?')) {
         axios.post('/api/V1/desk-lists/' + id, {
           _method: 'DELETE'
         }).then(function (response) {
-          _this9.desk_lists = [];
+          _this12.desk_lists = [];
 
-          _this9.getDeskLists();
+          _this12.getDeskLists();
         })["catch"](function (error) {
           console.log(error);
-          _this9.errored = true;
+          _this12.errored = true;
         })["finally"](function () {
           // когда все загрузилось
-          _this9.loading = false;
+          _this12.loading = false;
         });
       }
     }
   },
   mounted: function mounted() {
-    var _this10 = this;
+    var _this13 = this;
 
     axios.get('/api/V1/desks/' + this.deskId).then(function (response) {
-      _this10.name = response.data.data.name;
+      _this13.name = response.data.data.name;
     })["catch"](function (error) {
       console.log(error);
-      _this10.errored = true;
+      _this13.errored = true;
     })["finally"](function () {
       // когда все загрузилось
-      _this10.loading = false;
+      _this13.loading = false;
     });
     this.getDeskLists();
   },
@@ -5936,6 +6019,16 @@ __webpack_require__.r(__webpack_exports__);
         required: vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.required,
         maxLength: (0,vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.maxLength)(255)
       }
+    },
+    current_task_name: {
+      name: {
+        required: vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.required,
+        maxLength: (0,vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.maxLength)(255)
+      }
+    },
+    new_task_name: {
+      required: vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.required,
+      maxLength: (0,vuelidate_lib_validators__WEBPACK_IMPORTED_MODULE_0__.maxLength)(255)
     },
     desk_lists: {
       $each: {
@@ -29555,29 +29648,337 @@ var render = function () {
                       _c(
                         "div",
                         { staticClass: "modal-body" },
-                        _vm._l(_vm.current_card.tasks, function (task, index) {
-                          return _c("div", { staticClass: "mb-3 form-check" }, [
-                            _c("input", {
-                              staticClass: "form-check-input",
-                              attrs: {
-                                type: "checkbox",
-                                id: "exampleInputPassword" + task.id,
-                              },
-                            }),
-                            _vm._v(" "),
-                            _c(
-                              "label",
-                              {
-                                staticClass: "form-check-label",
-                                attrs: {
-                                  for: "exampleInputPassword" + task.id,
+                        [
+                          _c(
+                            "form",
+                            {
+                              on: {
+                                submit: function ($event) {
+                                  $event.preventDefault()
+                                  return _vm.addNewTask($event)
                                 },
                               },
-                              [_vm._v(_vm._s(task.name))]
-                            ),
-                          ])
-                        }),
-                        0
+                            },
+                            [
+                              _c("div", { staticClass: "mb-3" }, [
+                                _c(
+                                  "label",
+                                  {
+                                    staticClass: "form-label",
+                                    attrs: { for: "exampleFormControlInput4" },
+                                  },
+                                  [_vm._v("Введите название списка")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "div",
+                                  { staticClass: "d-flex align-items-center" },
+                                  [
+                                    _c("input", {
+                                      directives: [
+                                        {
+                                          name: "model",
+                                          rawName: "v-model",
+                                          value: _vm.new_task_name,
+                                          expression: "new_task_name",
+                                        },
+                                      ],
+                                      staticClass: "form-control",
+                                      class: {
+                                        "is-invalid":
+                                          _vm.$v.new_task_name.$error,
+                                      },
+                                      attrs: {
+                                        type: "text",
+                                        placeholder: "Введите название задачи",
+                                        id: "exampleFormControlInput4",
+                                      },
+                                      domProps: { value: _vm.new_task_name },
+                                      on: {
+                                        input: function ($event) {
+                                          if ($event.target.composing) {
+                                            return
+                                          }
+                                          _vm.new_task_name =
+                                            $event.target.value
+                                        },
+                                      },
+                                    }),
+                                    _vm._v(" "),
+                                    _c("i", {
+                                      staticClass:
+                                        "fa-solid fa-floppy-disk text-success",
+                                      staticStyle: {
+                                        "font-size": "17px",
+                                        cursor: "pointer",
+                                        "margin-left": "10px",
+                                      },
+                                      on: { click: _vm.addNewTask },
+                                    }),
+                                  ]
+                                ),
+                              ]),
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _vm._l(
+                            _vm.current_card.tasks,
+                            function (task, index) {
+                              return _c(
+                                "div",
+                                { staticClass: "mb-3 form-check" },
+                                [
+                                  _c(
+                                    "div",
+                                    {
+                                      staticClass: "d-flex align-items-center",
+                                    },
+                                    [
+                                      _vm.task_input_name_id === task.id
+                                        ? _c(
+                                            "form",
+                                            {
+                                              staticStyle: {
+                                                width: "100%",
+                                                "margin-right": "10px",
+                                                "margin-left": "-24px",
+                                              },
+                                              on: {
+                                                submit: function ($event) {
+                                                  $event.preventDefault()
+                                                  return _vm.updateTask(
+                                                    _vm.current_card.tasks[
+                                                      index
+                                                    ]
+                                                  )
+                                                },
+                                              },
+                                            },
+                                            [
+                                              _c("input", {
+                                                directives: [
+                                                  {
+                                                    name: "model",
+                                                    rawName: "v-model",
+                                                    value:
+                                                      _vm.current_card.tasks[
+                                                        index
+                                                      ].name,
+                                                    expression:
+                                                      "current_card.tasks[index].name",
+                                                  },
+                                                ],
+                                                staticClass: "form-control",
+                                                attrs: {
+                                                  type: "text",
+                                                  placeholder:
+                                                    "Введите название карточки",
+                                                },
+                                                domProps: {
+                                                  value:
+                                                    _vm.current_card.tasks[
+                                                      index
+                                                    ].name,
+                                                },
+                                                on: {
+                                                  input: function ($event) {
+                                                    if (
+                                                      $event.target.composing
+                                                    ) {
+                                                      return
+                                                    }
+                                                    _vm.$set(
+                                                      _vm.current_card.tasks[
+                                                        index
+                                                      ],
+                                                      "name",
+                                                      $event.target.value
+                                                    )
+                                                  },
+                                                },
+                                              }),
+                                            ]
+                                          )
+                                        : _c("div", [
+                                            _c("input", {
+                                              directives: [
+                                                {
+                                                  name: "model",
+                                                  rawName: "v-model",
+                                                  value:
+                                                    _vm.current_card.tasks[
+                                                      index
+                                                    ].is_done,
+                                                  expression:
+                                                    "current_card.tasks[index].is_done",
+                                                },
+                                              ],
+                                              staticClass: "form-check-input",
+                                              attrs: {
+                                                type: "checkbox",
+                                                id:
+                                                  "exampleInputPassword" +
+                                                  task.id,
+                                              },
+                                              domProps: {
+                                                checked: Array.isArray(
+                                                  _vm.current_card.tasks[index]
+                                                    .is_done
+                                                )
+                                                  ? _vm._i(
+                                                      _vm.current_card.tasks[
+                                                        index
+                                                      ].is_done,
+                                                      null
+                                                    ) > -1
+                                                  : _vm.current_card.tasks[
+                                                      index
+                                                    ].is_done,
+                                              },
+                                              on: {
+                                                change: [
+                                                  function ($event) {
+                                                    var $$a =
+                                                        _vm.current_card.tasks[
+                                                          index
+                                                        ].is_done,
+                                                      $$el = $event.target,
+                                                      $$c = $$el.checked
+                                                        ? true
+                                                        : false
+                                                    if (Array.isArray($$a)) {
+                                                      var $$v = null,
+                                                        $$i = _vm._i($$a, $$v)
+                                                      if ($$el.checked) {
+                                                        $$i < 0 &&
+                                                          _vm.$set(
+                                                            _vm.current_card
+                                                              .tasks[index],
+                                                            "is_done",
+                                                            $$a.concat([$$v])
+                                                          )
+                                                      } else {
+                                                        $$i > -1 &&
+                                                          _vm.$set(
+                                                            _vm.current_card
+                                                              .tasks[index],
+                                                            "is_done",
+                                                            $$a
+                                                              .slice(0, $$i)
+                                                              .concat(
+                                                                $$a.slice(
+                                                                  $$i + 1
+                                                                )
+                                                              )
+                                                          )
+                                                      }
+                                                    } else {
+                                                      _vm.$set(
+                                                        _vm.current_card.tasks[
+                                                          index
+                                                        ],
+                                                        "is_done",
+                                                        $$c
+                                                      )
+                                                    }
+                                                  },
+                                                  function ($event) {
+                                                    return _vm.updateTask(
+                                                      _vm.current_card.tasks[
+                                                        index
+                                                      ]
+                                                    )
+                                                  },
+                                                ],
+                                              },
+                                            }),
+                                            _vm._v(" "),
+                                            _c(
+                                              "label",
+                                              {
+                                                staticClass: "form-check-label",
+                                                attrs: {
+                                                  for:
+                                                    "exampleInputPassword" +
+                                                    task.id,
+                                                },
+                                              },
+                                              [_vm._v(_vm._s(task.name))]
+                                            ),
+                                          ]),
+                                      _vm._v(" "),
+                                      _c(
+                                        "div",
+                                        {
+                                          staticClass:
+                                            "d-flex flex-column align-items-center",
+                                          staticStyle: {
+                                            "margin-left": "auto",
+                                          },
+                                        },
+                                        [
+                                          _vm.task_input_name_id !== task.id
+                                            ? _c("i", {
+                                                staticClass:
+                                                  "fa-solid fa-pen text-success",
+                                                staticStyle: {
+                                                  "font-size": "9px",
+                                                  cursor: "pointer",
+                                                  "margin-bottom": "5px",
+                                                },
+                                                on: {
+                                                  click: function ($event) {
+                                                    _vm.task_input_name_id =
+                                                      task.id
+                                                  },
+                                                },
+                                              })
+                                            : _vm._e(),
+                                          _vm._v(" "),
+                                          _c("i", {
+                                            staticClass:
+                                              "fa-solid fa-floppy-disk text-info",
+                                            staticStyle: {
+                                              "font-size": "9px",
+                                              cursor: "pointer",
+                                              "margin-bottom": "5px",
+                                            },
+                                            on: {
+                                              click: function ($event) {
+                                                return _vm.updateTask(
+                                                  _vm.current_card.tasks[index]
+                                                )
+                                              },
+                                            },
+                                          }),
+                                          _vm._v(" "),
+                                          _c(
+                                            "i",
+                                            {
+                                              staticClass:
+                                                "fa-solid fa-xmark-large text-danger",
+                                              staticStyle: {
+                                                "font-size": "12px",
+                                                cursor: "pointer",
+                                              },
+                                              on: {
+                                                click: function ($event) {
+                                                  return _vm.deleteTask(task.id)
+                                                },
+                                              },
+                                            },
+                                            [_vm._v("×")]
+                                          ),
+                                        ]
+                                      ),
+                                    ]
+                                  ),
+                                ]
+                              )
+                            }
+                          ),
+                        ],
+                        2
                       ),
                     ]),
                   ]
