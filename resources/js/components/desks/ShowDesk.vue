@@ -92,6 +92,7 @@
                                             </form>
 
                                             <div v-else>
+
                                                 <input type="checkbox" class="form-check-input" @change="updateTask(current_card.tasks[index])" :id="'exampleInputPassword'+task.id" v-model="current_card.tasks[index].is_done">
                                                 <label class="form-check-label" :for="'exampleInputPassword' +task.id">{{ task.name }}</label>
                                             </div>
